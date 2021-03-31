@@ -1,0 +1,15 @@
+<div style="margin-top: 15px;">
+  <mat-card class="z-depth center" flex="50">
+    <mat-card-header>
+      <mat-card-title>Take a photo</mat-card-title>
+      <mat-card-subtitle>The image will be inserted in PDF form</mat-card-subtitle>
+    </mat-card-header>
+    <video #video id="video" mat-card-image autoplay *ngIf="displayStream"></video>
+    <canvas #canvas id="canvas" mat-card-image [width]="width" [height]="height" [hidden]="displayStream"></canvas>
+    <mat-card-actions *ngIf="actions">
+      <button mat-raised-button color="primary" (click)="capture()" *ngIf="displayStream">Capture Photo</button>
+      <button mat-raised-button color="warn" (click)="retakePhoto()" *ngIf="!displayStream">Retake Photo</button>
+      <button mat-raised-button color="accent" (click)="usePhoto()" *ngIf="!displayStream">Use photo</button>
+    </mat-card-actions>
+  </mat-card>
+</div>
