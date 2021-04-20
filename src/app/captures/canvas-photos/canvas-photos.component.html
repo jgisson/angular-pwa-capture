@@ -11,8 +11,9 @@
     </signature-pad>
     <mat-card-actions *ngIf="actions">
       <button mat-raised-button color="primary" (click)="capture()" *ngIf="displayStream">Capture Photo</button>
-      <button mat-raised-button color="warn" (click)="retakePhoto()" *ngIf="!displayStream">Retake Photo</button>
-      <button mat-raised-button color="accent" (click)="usePhoto()" *ngIf="!displayStream">Use photo</button>
+      <button mat-raised-button color="warn" (click)="takePhoto()" *ngIf="!displayStream">Take Photo</button>
+      <button mat-raised-button color="accent" (click)="saveAsPNG()" *ngIf="!displayStream">Save capture</button>
+      <button mat-raised-button color="accent" (click)="usePhoto()" *ngIf="!displayStream">Use capture</button>
     </mat-card-actions>
   </mat-card>
 </div>

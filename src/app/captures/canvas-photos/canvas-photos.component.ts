@@ -33,8 +33,8 @@ export class CanvasPhotosComponent implements OnInit {
   };
 
   constructor() {
-      this.displayStream = true;
-      this.hideCanvas = true;
+    this.displayStream = true;
+    this.hideCanvas = true;
   }
 
   ngOnInit() {
@@ -69,7 +69,7 @@ export class CanvasPhotosComponent implements OnInit {
     this.signaturePad.on();
   }
 
-  public retakePhoto() {
+  public takePhoto() {
     this.signaturePad.off();
     this.signaturePad.clear();
     this.displayStream = true;
@@ -91,6 +91,44 @@ export class CanvasPhotosComponent implements OnInit {
   public usePhoto() {
     const capture = this.signaturePad.toDataURL('image/jpeg');
     // TODO something with capture
+  }
+
+  public saveAsPNG() {
+    if (this.signaturePad.isEmpty()) {
+      alert("Please provide a signature first.");
+    } else {
+      const dataURL = this.signaturePad.toDataURL();
+      this.download(dataURL, "capture.png");
+    }
+  }
+
+  public download(dataURL, filename) {
+    const blob = this.dataURLToBlob(dataURL)
+    const url = window.URL.createObjectURL(blob)
+
+    const a = document.createElement("a");
+    a.style = "display: none";
+    a.href = url;
+    a.download = filename;
+
+    document.body.appendChild(a)
+    a.click()
+
+    window.URL.revokeObjectURL(url)
+  }
+
+  public dataURLToBlob(dataURL) {
+    const parts = dataURL.split('base64,')
+    const contentType = parts[0].split(":")[1]
+    const raw = window.atob(parts[1])
+    const rawLength = raw.length
+    const uInt8Array = new Uint8Array(rawLength)
+
+    for (let i = 0; i < rawLength; ++i) {
+      uInt8Array[i] = raw.charCodeAt(i)
+    }
+
+    return new Blob([uInt8Array], { type: contentType })
   }
 
   ngOnDestroy() {
