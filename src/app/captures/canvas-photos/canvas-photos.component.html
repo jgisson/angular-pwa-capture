@@ -7,13 +7,19 @@
     <video #video id="video" mat-card-image autoplay *ngIf="displayStream"></video>
     <canvas #canvas id="canvas" mat-card-image [width]="width" [height]="height" [hidden]="hideCanvas"></canvas>
     <signature-pad id="signaturePad" #signaturePad [options]="signaturePadOptions" class="signature"
-        [hidden]="displayStream">
+      [hidden]="displayStream">
     </signature-pad>
     <mat-card-actions *ngIf="actions">
-      <button mat-raised-button color="primary" (click)="capture()" *ngIf="displayStream">Capture Photo</button>
-      <button mat-raised-button color="warn" (click)="takePhoto()" *ngIf="!displayStream">Take Photo</button>
-      <button mat-raised-button color="accent" (click)="saveAsPNG()" *ngIf="!displayStream">Save capture</button>
-      <button mat-raised-button color="accent" (click)="usePhoto()" *ngIf="!displayStream">Use capture</button>
+      <button mat-raised-button color="primary" (click)="capture()" *ngIf="displayStream">Capture</button>
+      <button mat-raised-button color="primary" (click)="takePhoto()" *ngIf="!displayStream">Photo</button>
+      <input type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload accept="image/*" />
+      <button mat-raised-button color="primary" (click)="fileUpload.click()" *ngIf="!displayStream">Load image</button>
+      <button mat-raised-button color="primary" (click)="editImage()" *ngIf="!displayStream">Edit</button>
+      <button mat-raised-button color="primary" (click)="saveAsPNG()" *ngIf="!displayStream">Save</button>
+    </mat-card-actions>
+    <mat-card-actions *ngIf="editing">
+      <button mat-raised-button color="primary" (click)="changePenColor()" *ngIf="!displayStream && editing">Pen red</button>
+      <button mat-raised-button color="primary" (click)="saveEditing()" *ngIf="!displayStream && editing">Valid</button>
     </mat-card-actions>
   </mat-card>
 </div>

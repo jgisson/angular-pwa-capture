@@ -25,20 +25,24 @@ export class CanvasPhotosComponent implements OnInit {
   height: number;
 
   actions: boolean = false;
+  editing: boolean = false;
 
   public signaturePadOptions: Object = {
     'minWidth': 5,
-    'canvasWidth': 420,
-    'canvasHeight': 300
+    'canvasWidth': 340,
+    'canvasHeight': 200
   };
 
+  currentFile: File = null;
+  currentFilename: string = null;
+
   constructor() {
-    this.displayStream = true;
     this.hideCanvas = true;
+    this.actions = true;
   }
 
   ngOnInit() {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    /* if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia(this.constraints).then(stream => {
         this.video.nativeElement.srcObject = stream;
         this.video.nativeElement.play();
@@ -46,10 +50,9 @@ export class CanvasPhotosComponent implements OnInit {
           const { offsetWidth, offsetHeight } = this.video.nativeElement;
           this.width = offsetWidth;
           this.height = offsetHeight;
-          this.actions = true;
         });
       });
-    }
+    } */
   }
 
   ngAfterViewInit() {
@@ -66,7 +69,6 @@ export class CanvasPhotosComponent implements OnInit {
     this.canvas.nativeElement.getContext('2d').drawImage(this.video.nativeElement, 0, 0, this.width, this.height);
     this.signaturePad.fromDataURL(this.canvas.nativeElement.toDataURL());
     this.video.nativeElement.srcObject.getVideoTracks().forEach(track => track.stop());
-    this.signaturePad.on();
   }
 
   public takePhoto() {
@@ -88,10 +90,22 @@ export class CanvasPhotosComponent implements OnInit {
     }
   }
 
-  public usePhoto() {
+  public editImage() {
+    this.actions = false;
+    this.editing = true;
+    this.signaturePad.on();
+  }
+
+  public saveEditing() {
+    this.signaturePad.off();
+    this.editing = false;
+    this.actions = true;
+  }
+
+  /* public usePhoto() {
     const capture = this.signaturePad.toDataURL('image/jpeg');
     // TODO something with capture
-  }
+  } */
 
   public saveAsPNG() {
     if (this.signaturePad.isEmpty()) {
@@ -99,6 +113,17 @@ export class CanvasPhotosComponent implements OnInit {
     } else {
       const dataURL = this.signaturePad.toDataURL();
       this.download(dataURL, "capture.png");
+    }
+  }
+
+  onFileSelected(event) {
+    const file: File = event.target.files[0];
+
+    if (file) {
+      this.currentFilename = file.name;
+      const dataURL = window.URL.createObjectURL(file);
+      this.signaturePad.clear();
+      this.signaturePad.fromDataURL(dataURL);
     }
   }
 
@@ -115,6 +140,10 @@ export class CanvasPhotosComponent implements OnInit {
     a.click()
 
     window.URL.revokeObjectURL(url)
+  }
+
+  public changePenColor() {
+    this.signaturePad.set('penColor', 'red')
   }
 
   public dataURLToBlob(dataURL) {
