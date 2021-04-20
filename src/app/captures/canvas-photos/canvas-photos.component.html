@@ -18,8 +18,10 @@
       <button mat-raised-button color="primary" (click)="saveAsPNG()" *ngIf="!displayStream">Save</button>
     </mat-card-actions>
     <mat-card-actions *ngIf="editing">
-      <button mat-raised-button color="primary" (click)="changePenColor()" *ngIf="!displayStream && editing">Pen red</button>
-      <button mat-raised-button color="primary" (click)="saveEditing()" *ngIf="!displayStream && editing">Valid</button>
+      <span [(colorPicker)]="colorPen1" [style.color]="colorPen1" [cpOKButton]=true [cpCancelButton]=true
+        [cpAlphaChannel]="'disabled'" [cpDisableInput]=true [cpOutputFormat]="'rgba'"
+        (colorPickerChange)="changePenColor($event);colorPen1=$event;">Pen Color</span>
+      <button mat-raised-button color="primary" (click)="saveEditing()">Valid</button>
     </mat-card-actions>
   </mat-card>
 </div>

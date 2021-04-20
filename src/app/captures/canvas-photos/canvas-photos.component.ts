@@ -61,7 +61,7 @@ export class CanvasPhotosComponent implements OnInit {
     this.signaturePad.set('maxWidth', 1);
     // this.signaturePad.set('canvasWidth', this.width);
     // this.signaturePad.set('canvasHeight', this.height);
-    this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
+    this.signaturePad.off(); // invoke functions from szimek/signature_pad API
   }
 
   public capture() {
@@ -132,18 +132,18 @@ export class CanvasPhotosComponent implements OnInit {
     const url = window.URL.createObjectURL(blob)
 
     const a = document.createElement("a");
-    a.style = "display: none";
     a.href = url;
     a.download = filename;
 
-    document.body.appendChild(a)
-    a.click()
-
-    window.URL.revokeObjectURL(url)
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   }
 
-  public changePenColor() {
-    this.signaturePad.set('penColor', 'red')
+  public changePenColor(color: string) {
+    console.log('Color changed:', color);
+    this.signaturePad.set('penColor', color);
   }
 
   public dataURLToBlob(dataURL) {

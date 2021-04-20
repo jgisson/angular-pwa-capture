@@ -11,6 +11,7 @@ import { MatCardModule } from '@angular/material/card';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { SignaturePadModule } from 'angular2-signaturepad';
 import { CanvasPhotosComponent } from './captures/canvas-photos/canvas-photos.component';
+import { ColorPickerModule } from 'ngx-color-picker';
 
 const MatModules = [
   MatButtonModule,
@@ -30,7 +31,8 @@ const MatModules = [
     MatModules,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
     NoopAnimationsModule,
-    SignaturePadModule
+    SignaturePadModule,
+    ColorPickerModule
   ],
   providers: [],
   bootstrap: [AppComponent]

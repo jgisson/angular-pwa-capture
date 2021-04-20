@@ -23,6 +23,7 @@
     "@angular/router": "~10.2.4",
     "@angular/service-worker": "~10.2.4",
     "angular2-signaturepad": "^3.0.4",
+    "ngx-color-picker": "^11.0.0",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
     "zone.js": "~0.10.2"
