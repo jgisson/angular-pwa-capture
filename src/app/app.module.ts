@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { SignaturePadModule } from 'angular2-signaturepad';
 import { CanvasPhotosComponent } from './captures/canvas-photos/canvas-photos.component';
 
 const MatModules = [
@@ -28,7 +29,8 @@ const MatModules = [
     AppRoutingModule,
     MatModules,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
-    NoopAnimationsModule
+    NoopAnimationsModule,
+    SignaturePadModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -5,7 +5,10 @@
       <mat-card-subtitle>The image will be inserted in PDF form</mat-card-subtitle>
     </mat-card-header>
     <video #video id="video" mat-card-image autoplay *ngIf="displayStream"></video>
-    <canvas #canvas id="canvas" mat-card-image [width]="width" [height]="height" [hidden]="displayStream"></canvas>
+    <canvas #canvas id="canvas" mat-card-image [width]="width" [height]="height" [hidden]="hideCanvas"></canvas>
+    <signature-pad id="signaturePad" #signaturePad [options]="signaturePadOptions" class="signature"
+        [hidden]="displayStream">
+    </signature-pad>
     <mat-card-actions *ngIf="actions">
       <button mat-raised-button color="primary" (click)="capture()" *ngIf="displayStream">Capture Photo</button>
       <button mat-raised-button color="warn" (click)="retakePhoto()" *ngIf="!displayStream">Retake Photo</button>

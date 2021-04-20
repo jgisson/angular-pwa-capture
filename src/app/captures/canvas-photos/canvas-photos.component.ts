@@ -1,4 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { SignaturePad } from 'angular2-signaturepad';
 
 @Component({
   selector: 'app-canvas-photos',
@@ -12,18 +13,28 @@ export class CanvasPhotosComponent implements OnInit {
   video: ElementRef;
   @ViewChild('canvas')
   canvas: ElementRef;
+  @ViewChild('signaturePad')
+  signaturePad: SignaturePad;
 
   private constraints = {
     video: true,
   };
   displayStream: boolean;
+  hideCanvas: boolean;
   width: number;
   height: number;
 
   actions: boolean = false;
 
+  public signaturePadOptions: Object = {
+    'minWidth': 5,
+    'canvasWidth': 420,
+    'canvasHeight': 300
+  };
+
   constructor() {
       this.displayStream = true;
+      this.hideCanvas = true;
   }
 
   ngOnInit() {
@@ -41,13 +52,26 @@ export class CanvasPhotosComponent implements OnInit {
     }
   }
 
+  ngAfterViewInit() {
+    // this.signaturePad is now available
+    this.signaturePad.set('minWidth', 1); // set szimek/signature_pad options at runtime
+    this.signaturePad.set('maxWidth', 1);
+    // this.signaturePad.set('canvasWidth', this.width);
+    // this.signaturePad.set('canvasHeight', this.height);
+    this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
+  }
+
   public capture() {
     this.displayStream = false;
     this.canvas.nativeElement.getContext('2d').drawImage(this.video.nativeElement, 0, 0, this.width, this.height);
+    this.signaturePad.fromDataURL(this.canvas.nativeElement.toDataURL());
     this.video.nativeElement.srcObject.getVideoTracks().forEach(track => track.stop());
+    this.signaturePad.on();
   }
 
   public retakePhoto() {
+    this.signaturePad.off();
+    this.signaturePad.clear();
     this.displayStream = true;
     this.actions = false;
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -65,7 +89,7 @@ export class CanvasPhotosComponent implements OnInit {
   }
 
   public usePhoto() {
-    const capture = this.canvas.nativeElement.toDataURL('image/jpeg');
+    const capture = this.signaturePad.toDataURL('image/jpeg');
     // TODO something with capture
   }
 
