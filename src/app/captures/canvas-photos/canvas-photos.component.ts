@@ -13,6 +13,8 @@ export class CanvasPhotosComponent implements OnInit {
   video: ElementRef;
   @ViewChild('canvas')
   canvas: ElementRef;
+  @ViewChild("select")
+  select: ElementRef;
   @ViewChild('signaturePad')
   signaturePad: SignaturePad;
 
@@ -64,6 +66,58 @@ export class CanvasPhotosComponent implements OnInit {
     this.signaturePad.off(); // invoke functions from szimek/signature_pad API
   }
 
+  gotDevices(mdi: MediaDeviceInfo[]) {
+    var select = this.select.nativeElement
+    select.innerHTML = '';
+    select.appendChild(document.createElement('option'));
+    let count = 1;
+    mdi.forEach(mediaDevice => {
+      if (mediaDevice.kind === 'videoinput') {
+        const option = document.createElement('option');
+        option.value = mediaDevice.deviceId;
+        const label = mediaDevice.label || `Camera ${count++}`;
+        const textNode = document.createTextNode(label);
+        option.appendChild(textNode);
+        select.appendChild(option);
+      }
+    });
+  }
+
+  stopMediaTracks(stream: MediaStream) {
+    stream.getTracks().forEach(track => {
+      track.stop();
+    });
+  }
+
+  public switchCamera() {
+    navigator.mediaDevices.getUserMedia(this.constraints).then(stream => {
+      if (typeof stream !== 'undefined') {
+        this.stopMediaTracks(stream);
+      }
+      const videoConstraints: MediaTrackConstraints = {};
+      if (this.select.nativeElement.value === '') {
+        videoConstraints.facingMode = 'environment';
+      } else {
+        videoConstraints.deviceId = { exact: this.select.nativeElement.value };
+      }
+      const constraints = {
+        video: videoConstraints,
+        audio: false
+      };
+      navigator.mediaDevices
+        .getUserMedia(constraints)
+        .then(_stream => {
+          stream = _stream;
+          this.video.nativeElement.srcObject = _stream;
+          return navigator.mediaDevices.enumerateDevices();
+        })
+        .then(mdi => this.gotDevices(mdi))
+        .catch(error => {
+          console.error(error);
+        });
+    })
+  };
+
   public capture() {
     this.displayStream = false;
     this.canvas.nativeElement.getContext('2d').drawImage(this.video.nativeElement, 0, 0, this.width, this.height);
@@ -77,6 +131,9 @@ export class CanvasPhotosComponent implements OnInit {
     this.displayStream = true;
     this.actions = false;
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.enumerateDevices().then(mdi => {
+        this.gotDevices(mdi)
+      });
       navigator.mediaDevices.getUserMedia(this.constraints).then(stream => {
         this.video.nativeElement.srcObject = stream;
         this.video.nativeElement.play();
