@@ -8,6 +8,9 @@ import { environment } from '../environments/environment';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { SignaturePadModule } from 'angular2-signaturepad';
 import { CanvasPhotosComponent } from './captures/canvas-photos/canvas-photos.component';
@@ -16,7 +19,10 @@ import { ColorPickerModule } from 'ngx-color-picker';
 const MatModules = [
   MatButtonModule,
   MatCardModule,
-  MatSnackBarModule
+  MatSnackBarModule,
+  MatSelectModule,
+  MatFormFieldModule,
+  MatInputModule
 ];
 
 @NgModule({

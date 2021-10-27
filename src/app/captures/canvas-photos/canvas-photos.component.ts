@@ -13,14 +13,16 @@ export class CanvasPhotosComponent implements OnInit {
   video: ElementRef;
   @ViewChild('canvas')
   canvas: ElementRef;
-  @ViewChild("select")
-  select: ElementRef;
   @ViewChild('signaturePad')
   signaturePad: SignaturePad;
 
-  private constraints = {
-    video: true,
+  // default capture constraints
+  private constraints: MediaStreamConstraints = {
+    video: { facingMode: { exact: "environment" } },
+    audio: false,
   };
+  videoDevices: MediaDeviceInfo[] = [];
+  selectedDeviceId: string;
   displayStream: boolean;
   hideCanvas: boolean;
   width: number;
@@ -44,17 +46,6 @@ export class CanvasPhotosComponent implements OnInit {
   }
 
   ngOnInit() {
-    /* if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia(this.constraints).then(stream => {
-        this.video.nativeElement.srcObject = stream;
-        this.video.nativeElement.play();
-        this.video.nativeElement.addEventListener('playing', () => {
-          const { offsetWidth, offsetHeight } = this.video.nativeElement;
-          this.width = offsetWidth;
-          this.height = offsetHeight;
-        });
-      });
-    } */
   }
 
   ngAfterViewInit() {
@@ -66,63 +57,30 @@ export class CanvasPhotosComponent implements OnInit {
     this.signaturePad.off(); // invoke functions from szimek/signature_pad API
   }
 
-  gotDevices(mdi: MediaDeviceInfo[]) {
-    var select = this.select.nativeElement
-    select.innerHTML = '';
-    select.appendChild(document.createElement('option'));
-    let count = 1;
-    mdi.forEach(mediaDevice => {
-      if (mediaDevice.kind === 'videoinput') {
-        const option = document.createElement('option');
-        option.value = mediaDevice.deviceId;
-        const label = mediaDevice.label || `Camera ${count++}`;
-        const textNode = document.createTextNode(label);
-        option.appendChild(textNode);
-        select.appendChild(option);
-      }
-    });
-  }
-
   stopMediaTracks(stream: MediaStream) {
     stream.getTracks().forEach(track => {
       track.stop();
     });
   }
 
-  public switchCamera() {
+  public switchCamera(event) {
+    console.log("selected device :" + this.selectedDeviceId);
+
     navigator.mediaDevices.getUserMedia(this.constraints).then(stream => {
       if (typeof stream !== 'undefined') {
         this.stopMediaTracks(stream);
       }
-      const videoConstraints: MediaTrackConstraints = {};
-      if (this.select.nativeElement.value === '') {
-        videoConstraints.facingMode = 'environment';
-      } else {
-        videoConstraints.deviceId = { exact: this.select.nativeElement.value };
-      }
-      const constraints = {
-        video: videoConstraints,
-        audio: false
-      };
-      navigator.mediaDevices
-        .getUserMedia(constraints)
-        .then(_stream => {
-          stream = _stream;
-          this.video.nativeElement.srcObject = _stream;
-          return navigator.mediaDevices.enumerateDevices();
-        })
-        .then(mdi => this.gotDevices(mdi))
-        .catch(error => {
-          console.error(error);
-        });
+      this.initCamera();
     })
   };
 
-  public capture() {
-    this.displayStream = false;
-    this.canvas.nativeElement.getContext('2d').drawImage(this.video.nativeElement, 0, 0, this.width, this.height);
-    this.signaturePad.fromDataURL(this.canvas.nativeElement.toDataURL());
-    this.video.nativeElement.srcObject.getVideoTracks().forEach(track => track.stop());
+  getVideoDevices(mdi: MediaDeviceInfo[]) {
+    this.videoDevices = [];
+    mdi.forEach(mediaDevice => {
+      if (mediaDevice.kind === 'videoinput') {
+        this.videoDevices.push(mediaDevice);
+      }
+    });
   }
 
   public takePhoto() {
@@ -132,19 +90,40 @@ export class CanvasPhotosComponent implements OnInit {
     this.actions = false;
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.enumerateDevices().then(mdi => {
-        this.gotDevices(mdi)
+        this.getVideoDevices(mdi)
       });
-      navigator.mediaDevices.getUserMedia(this.constraints).then(stream => {
-        this.video.nativeElement.srcObject = stream;
-        this.video.nativeElement.play();
-        this.video.nativeElement.addEventListener('playing', () => {
-          const { offsetWidth, offsetHeight } = this.video.nativeElement;
-          this.width = offsetWidth;
-          this.height = offsetHeight;
-          this.actions = true;
-        });
-      });
+      this.initCamera();
     }
+  }
+
+  public initCamera() {
+    const videoConstraints: MediaTrackConstraints = {};
+    if (this.selectedDeviceId) {
+      videoConstraints.facingMode = 'environment';
+    } else {
+      videoConstraints.deviceId = this.selectedDeviceId;
+    }
+    this.constraints = {
+      video: videoConstraints,
+      audio: false
+    };
+    navigator.mediaDevices.getUserMedia(this.constraints).then(stream => {
+      this.video.nativeElement.srcObject = stream;
+      this.video.nativeElement.play();
+      this.video.nativeElement.addEventListener('playing', () => {
+        const { offsetWidth, offsetHeight } = this.video.nativeElement;
+        this.width = offsetWidth;
+        this.height = offsetHeight;
+        this.actions = true;
+      });
+    });
+  }
+
+  public capture() {
+    this.displayStream = false;
+    this.canvas.nativeElement.getContext('2d').drawImage(this.video.nativeElement, 0, 0, this.width, this.height);
+    this.signaturePad.fromDataURL(this.canvas.nativeElement.toDataURL());
+    this.video.nativeElement.srcObject.getVideoTracks().forEach(track => track.stop());
   }
 
   public editImage() {
