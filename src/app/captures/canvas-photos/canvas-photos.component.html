@@ -12,14 +12,16 @@
 
     <mat-card-actions *ngIf="actions">
       <mat-form-field appearance="fill" *ngIf="displayStream">
-        <mat-label>Caméra </mat-label>
-        <mat-select [(value)]="selectedDeviceId" (selectionChange)="switchCamera($event)">
-          <mat-option ></mat-option>
+        <mat-label>Caméra</mat-label>
+        <mat-select (onSelectionChange)="switchCamera($event)">
+          <mat-option>Aucun</mat-option>
           <mat-option *ngFor="let videoDevice of videoDevices" [value]="videoDevice.devideId">
             {{ videoDevice.label }}
           </mat-option>
         </mat-select>
       </mat-form-field>
+      <p>selected device id : {{ selectedDeviceId }}</p>
+      
       <button mat-raised-button color="primary" (click)="capture()" *ngIf="displayStream">Capture</button>
       <button mat-raised-button color="primary" (click)="takePhoto()" *ngIf="!displayStream">Photo</button>
       <input type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload accept="image/*" />

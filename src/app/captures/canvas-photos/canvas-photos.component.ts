@@ -16,11 +16,6 @@ export class CanvasPhotosComponent implements OnInit {
   @ViewChild('signaturePad')
   signaturePad: SignaturePad;
 
-  // default capture constraints
-  private constraints: MediaStreamConstraints = {
-    video: { facingMode: { exact: "environment" } },
-    audio: false,
-  };
   videoDevices: MediaDeviceInfo[] = [];
   selectedDeviceId: string;
   displayStream: boolean;
@@ -57,22 +52,17 @@ export class CanvasPhotosComponent implements OnInit {
     this.signaturePad.off(); // invoke functions from szimek/signature_pad API
   }
 
-  stopMediaTracks(stream: MediaStream) {
-    stream.getTracks().forEach(track => {
-      track.stop();
-    });
+  stopMediaTracks() {
+    this.video.nativeElement.srcObject.getVideoTracks().forEach(track => track.stop());
   }
 
   public switchCamera(event) {
-    console.log("selected device :" + this.selectedDeviceId);
+    console.log("selected device :" + event.value);
 
-    navigator.mediaDevices.getUserMedia(this.constraints).then(stream => {
-      if (typeof stream !== 'undefined') {
-        this.stopMediaTracks(stream);
-      }
-      this.initCamera();
-    })
-  };
+    this.selectedDeviceId = event.value;
+    this.stopMediaTracks();
+    this.initCamera();
+  }
 
   getVideoDevices(mdi: MediaDeviceInfo[]) {
     this.videoDevices = [];
@@ -97,17 +87,14 @@ export class CanvasPhotosComponent implements OnInit {
   }
 
   public initCamera() {
-    const videoConstraints: MediaTrackConstraints = {};
+    let constraints;
     if (this.selectedDeviceId) {
-      videoConstraints.facingMode = 'environment';
+      constraints = { video: { facingMode: this.selectedDeviceId } };
     } else {
-      videoConstraints.deviceId = this.selectedDeviceId;
+      constraints = { video: { facingMode: "environment" } };
     }
-    this.constraints = {
-      video: videoConstraints,
-      audio: false
-    };
-    navigator.mediaDevices.getUserMedia(this.constraints).then(stream => {
+
+    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
       this.video.nativeElement.srcObject = stream;
       this.video.nativeElement.play();
       this.video.nativeElement.addEventListener('playing', () => {
@@ -123,7 +110,7 @@ export class CanvasPhotosComponent implements OnInit {
     this.displayStream = false;
     this.canvas.nativeElement.getContext('2d').drawImage(this.video.nativeElement, 0, 0, this.width, this.height);
     this.signaturePad.fromDataURL(this.canvas.nativeElement.toDataURL());
-    this.video.nativeElement.srcObject.getVideoTracks().forEach(track => track.stop());
+    this.stopMediaTracks();
   }
 
   public editImage() {
@@ -199,7 +186,7 @@ export class CanvasPhotosComponent implements OnInit {
   ngOnDestroy() {
     this.actions = false;
     if (this.video) {
-      this.video.nativeElement.srcObject.getVideoTracks().forEach(track => track.stop());
+      this.stopMediaTracks();
     }
   }
 
