@@ -20,16 +20,16 @@ export class CanvasPhotosComponent implements OnInit {
   selectedDeviceId: string;
   displayStream: boolean;
   hideCanvas: boolean;
-  width: number;
-  height: number;
+  // Video and photo 4/3
+  width: number = window.innerWidth - 30;
+  height: number = this.width * 0.75;
 
   actions: boolean = false;
   editing: boolean = false;
 
   public signaturePadOptions: Object = {
-    'minWidth': 5,
-    'canvasWidth': 340,
-    'canvasHeight': 200
+    'canvasWidth': this.width,
+    'canvasHeight': this.height
   };
 
   currentFile: File = null;
@@ -56,10 +56,10 @@ export class CanvasPhotosComponent implements OnInit {
     this.video.nativeElement.srcObject.getVideoTracks().forEach(track => track.stop());
   }
 
-  public switchCamera(event) {
-    console.log("selected device :" + event.value);
+  public switchCamera(event, videoDevice) {
+    console.log("selected device :" + videoDevice);
 
-    this.selectedDeviceId = event.value;
+    this.selectedDeviceId = videoDevice.deviceId;
     this.stopMediaTracks();
     this.initCamera();
   }
@@ -89,7 +89,7 @@ export class CanvasPhotosComponent implements OnInit {
   public initCamera() {
     let constraints;
     if (this.selectedDeviceId) {
-      constraints = { video: { facingMode: this.selectedDeviceId } };
+      constraints = { video: { deviceId: this.selectedDeviceId } };
     } else {
       constraints = { video: { facingMode: "environment" } };
     }

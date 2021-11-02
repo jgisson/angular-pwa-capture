@@ -4,24 +4,21 @@
       <mat-card-title>Take a photo</mat-card-title>
       <mat-card-subtitle>The image will be inserted in PDF form</mat-card-subtitle>
     </mat-card-header>
-    <video #video id="video" mat-card-image autoplay *ngIf="displayStream"></video>
+    <video #video id="video" mat-card-image autoplay [width]="width" [height]="height" *ngIf="displayStream"></video>
     <canvas #canvas id="canvas" mat-card-image [width]="width" [height]="height" [hidden]="hideCanvas"></canvas>
     <signature-pad id="signaturePad" #signaturePad [options]="signaturePadOptions" class="signature"
       [hidden]="displayStream">
     </signature-pad>
 
     <mat-card-actions *ngIf="actions">
-      <mat-form-field appearance="fill" *ngIf="displayStream">
-        <mat-label>Caméra</mat-label>
-        <mat-select (onSelectionChange)="switchCamera($event)">
-          <mat-option>Aucun</mat-option>
-          <mat-option *ngFor="let videoDevice of videoDevices" [value]="videoDevice.devideId">
-            {{ videoDevice.label }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <p>selected device id : {{ selectedDeviceId }}</p>
-      
+
+      <button mat-button color="primary" [matMenuTriggerFor]="cameraMenu" *ngIf="displayStream">Caméra</button>
+      <mat-menu #cameraMenu="matMenu" [overlapTrigger]="false">
+        <span *ngFor="let videoDevice of videoDevices">
+          <button mat-menu-item color="primary" (click)="switchCamera($event, videoDevice)">{{videoDevice.label}}</button>
+        </span>
+      </mat-menu>
+
       <button mat-raised-button color="primary" (click)="capture()" *ngIf="displayStream">Capture</button>
       <button mat-raised-button color="primary" (click)="takePhoto()" *ngIf="!displayStream">Photo</button>
       <input type="file" class="file-input" (change)="onFileSelected($event)" #fileUpload accept="image/*" />
