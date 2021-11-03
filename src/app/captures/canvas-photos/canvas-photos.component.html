@@ -2,21 +2,21 @@
   <mat-card class="z-depth center" flex="50">
     <mat-card-header>
       <mat-card-title>Take a photo</mat-card-title>
-      <mat-card-subtitle>The image will be inserted in PDF form</mat-card-subtitle>
+      <mat-card-subtitle>Original size {{width}} * {{height}}</mat-card-subtitle>
     </mat-card-header>
     <video #video id="video" mat-card-image autoplay [width]="width" [height]="height" *ngIf="displayStream"></video>
     <canvas #canvas id="canvas" mat-card-image [width]="width" [height]="height" [hidden]="hideCanvas"></canvas>
     <signature-pad id="signaturePad" #signaturePad [options]="signaturePadOptions" class="signature"
       [hidden]="displayStream">
     </signature-pad>
+    <div *ngIf="displayStream"><span>Facing Mode: {{streamFacingMode}} / width: {{streamWidth}} / height: {{streamHeight}} / ratio {{streamRatio}} / FrameRate {{streamFrameRate}} </span></div>
 
     <mat-card-actions *ngIf="actions">
 
       <button mat-button color="primary" [matMenuTriggerFor]="cameraMenu" *ngIf="displayStream">Caméra</button>
       <mat-menu #cameraMenu="matMenu" [overlapTrigger]="false">
-        <span *ngFor="let videoDevice of videoDevices">
-          <button mat-menu-item color="primary" (click)="switchCamera($event, videoDevice)">{{videoDevice.label}}</button>
-        </span>
+          <button mat-menu-item color="primary" (click)="switchCamera($event, 'user')">User (front)</button>
+          <button mat-menu-item color="primary" (click)="switchCamera($event, 'environment')">Environment (rear)</button>
       </mat-menu>
 
       <button mat-raised-button color="primary" (click)="capture()" *ngIf="displayStream">Capture</button>

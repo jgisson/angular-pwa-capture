@@ -17,12 +17,17 @@ export class CanvasPhotosComponent implements OnInit {
   signaturePad: SignaturePad;
 
   videoDevices: MediaDeviceInfo[] = [];
-  selectedDeviceId: string;
+  selectedFacingMode: string = "environment";
   displayStream: boolean;
   hideCanvas: boolean;
   // Video and photo 4/3
   width: number = window.innerWidth - 30;
   height: number = this.width * 0.75;
+  streamWidth: number;
+  streamHeight: number
+  streamRatio: number;
+  streamFacingMode: string;
+  streamFrameRate: number;
 
   actions: boolean = false;
   editing: boolean = false;
@@ -56,21 +61,12 @@ export class CanvasPhotosComponent implements OnInit {
     this.video.nativeElement.srcObject.getVideoTracks().forEach(track => track.stop());
   }
 
-  public switchCamera(event, videoDevice) {
-    console.log("selected device :" + videoDevice);
+  public switchCamera(event, facingMode) {
+    console.log("selected facingMode: " + facingMode);
 
-    this.selectedDeviceId = videoDevice.deviceId;
+    this.selectedFacingMode = facingMode;
     this.stopMediaTracks();
     this.initCamera();
-  }
-
-  getVideoDevices(mdi: MediaDeviceInfo[]) {
-    this.videoDevices = [];
-    mdi.forEach(mediaDevice => {
-      if (mediaDevice.kind === 'videoinput') {
-        this.videoDevices.push(mediaDevice);
-      }
-    });
   }
 
   public takePhoto() {
@@ -79,28 +75,31 @@ export class CanvasPhotosComponent implements OnInit {
     this.displayStream = true;
     this.actions = false;
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.enumerateDevices().then(mdi => {
-        this.getVideoDevices(mdi)
-      });
       this.initCamera();
+    } else {
+      alert('Can not enable camera !');
     }
   }
 
   public initCamera() {
-    let constraints;
-    if (this.selectedDeviceId) {
-      constraints = { video: { deviceId: this.selectedDeviceId } };
-    } else {
-      constraints = { video: { facingMode: "environment" } };
-    }
+    // Swap width and height for use portrait orientation
+    let constraints = { video: { "width": this.height, "height": this.width, facingMode: this.selectedFacingMode } };
 
     navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+      stream.getVideoTracks().forEach(videoTrack => {
+        let mediaTrackSettings = videoTrack.getSettings();
+        this.streamFacingMode = mediaTrackSettings.facingMode;
+        this.streamWidth = mediaTrackSettings.width;
+        this.streamHeight = mediaTrackSettings.height;
+        this.streamRatio = mediaTrackSettings.aspectRatio;
+        this.streamFrameRate = mediaTrackSettings.frameRate;
+      });
       this.video.nativeElement.srcObject = stream;
       this.video.nativeElement.play();
       this.video.nativeElement.addEventListener('playing', () => {
-        const { offsetWidth, offsetHeight } = this.video.nativeElement;
-        this.width = offsetWidth;
-        this.height = offsetHeight;
+        // const { offsetWidth, offsetHeight } = this.video.nativeElement;
+        // this.width = offsetWidth;
+        // this.height = offsetHeight;
         this.actions = true;
       });
     });
