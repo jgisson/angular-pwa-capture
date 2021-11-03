@@ -82,10 +82,10 @@ export class CanvasPhotosComponent implements OnInit {
   }
 
   public initCamera() {
-    // Swap width and height for use portrait orientation
     let constraints = { video: { "width": this.height, "height": this.width, facingMode: this.selectedFacingMode } };
 
-    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+    navigator.mediaDevices.getUserMedia(constraints)
+    .then(stream => {
       stream.getVideoTracks().forEach(videoTrack => {
         let mediaTrackSettings = videoTrack.getSettings();
         this.streamFacingMode = mediaTrackSettings.facingMode;
@@ -93,16 +93,32 @@ export class CanvasPhotosComponent implements OnInit {
         this.streamHeight = mediaTrackSettings.height;
         this.streamRatio = mediaTrackSettings.aspectRatio;
         this.streamFrameRate = mediaTrackSettings.frameRate;
+        // Swap width and height for use portrait orientation
+        if (this.streamHeight > this.streamWidth) {
+          console.log('Swap width and height for use portrait orientation');
+          let trackConstraints = videoTrack.getConstraints();
+          trackConstraints.width = this.width;
+          trackConstraints.height = this.height;
+          videoTrack.applyConstraints(trackConstraints).then(track =>  {
+            this.video.nativeElement.srcObject = stream;
+            this.video.nativeElement.play();
+            this.video.nativeElement.addEventListener('playing', () => {
+              this.actions = true;
+            });
+          });
+        } else {
+          this.video.nativeElement.srcObject = stream;
+          this.video.nativeElement.play();
+          this.video.nativeElement.addEventListener('playing', () => {
+            this.actions = true;
+          });
+        }
       });
-      this.video.nativeElement.srcObject = stream;
-      this.video.nativeElement.play();
-      this.video.nativeElement.addEventListener('playing', () => {
-        // const { offsetWidth, offsetHeight } = this.video.nativeElement;
-        // this.width = offsetWidth;
-        // this.height = offsetHeight;
-        this.actions = true;
-      });
+    })
+    .catch(function(err) {
+      alert(`Can not init cam (${err.name})`);
     });
+
   }
 
   public capture() {
